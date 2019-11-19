@@ -229,42 +229,45 @@ def validate(args, test_loader, model, device, criterion, epoch, train_writer=No
 
 
 def main():
+    # -------------------参数配置--------------------
+    # ----1. 训练参数配置----
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
-                        help='input batch size for training (default: 64)')
+                        help='input batch size for training (default: 64)')    # 训练batchsize，默认为64
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
-                        help='input batch size for testing (default: 1000)')
+                        help='input batch size for testing (default: 1000)')   # 测试batch
     parser.add_argument('--world_size', type=int, default=1,
-                        help='number of GPUs to use')
+                        help='number of GPUs to use')    # 是否分布式，> 1 则会启用分布式，模型并行
 
     parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                        help='number of epochs to train (default: 10)')
+                        help='number of epochs to train (default: 10)')   # 训练epoch，默认为10
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
-                        help='learning rate (default: 0.01)')
+                        help='learning rate (default: 0.01)')             # 初始学习率，默认0.01
     parser.add_argument('--wd', type=float, default=1e-4,
-                        help='weight decay (default: 5e-4)')
+                        help='weight decay (default: 5e-4)')      # weight decay
     parser.add_argument('--lr-decay-every', type=int, default=100,
-                        help='learning rate decay by 10 every X epochs')
-    parser.add_argument('--lr-decay-scalar', type=float, default=0.1,
+                        help='learning rate decay by 10 every X epochs')   # 学习率调整的频率，单位是epoch，即每隔多少epoch调整一次lr
+    parser.add_argument('--lr-decay-scalar', type=float, default=0.1,      # 学习率调整的幅度，默认每次下降0.1倍
                         help='--')
     parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                         help='SGD momentum (default: 0.5)')
-    parser.add_argument('--no-cuda', action='store_true', default=False,
+    parser.add_argument('--no-cuda', action='store_true', default=False,   # 是否cuda
                         help='disables CUDA training')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
+                        help='how many batches to wait before logging training status')   # log的频率，屏幕显示
 
+    # 跑测试
     parser.add_argument('--run_test', default=False,  type=str2bool, nargs='?',
                         help='run test only')
 
     parser.add_argument('--limit_training_batches', type=int, default=-1,
-                        help='how many batches to do per training, -1 means as many as possible')
+                        help='how many batches to do per training, -1 means as many as possible')  # 一次训练的最大batches，-1表示无上限
 
     parser.add_argument('--no_grad_clip', default=False,  type=str2bool, nargs='?',
-                        help='turn off gradient clipping')
+                        help='turn off gradient clipping')    # 梯度修剪标志，一般防止梯度爆炸
 
     parser.add_argument('--get_flops', default=False,  type=str2bool, nargs='?',
                         help='add hooks to compute flops')
@@ -273,18 +276,18 @@ def main():
                         help='runs valid multiple times and reports the result')
 
     parser.add_argument('--mgpu', default=False,  type=str2bool, nargs='?',
-                        help='use data paralization via multiple GPUs')
+                        help='use data paralization via multiple GPUs')      # 几个GPU=》数据并行
 
     parser.add_argument('--dataset', default="MNIST", type=str,
-                        help='dataset for experiment, choice: MNIST, CIFAR10', choices= ["MNIST", "CIFAR10", "Imagenet"])
+                        help='dataset for experiment, choice: MNIST, CIFAR10', choices= ["MNIST", "CIFAR10", "Imagenet"])  #数据集类别
 
-    parser.add_argument('--data', metavar='DIR', default='/imagenet', help='path to imagenet dataset')
+    parser.add_argument('--data', metavar='DIR', default='/imagenet', help='path to imagenet dataset')  # 数据集路径
 
     parser.add_argument('--model', default="lenet3", type=str,
                         help='model selection, choices: lenet3, vgg, mobilenetv2, resnet18',
                         choices=["lenet3", "vgg", "mobilenetv2", "resnet18", "resnet152", "resnet50", "resnet50_noskip",
                                  "resnet20", "resnet34", "resnet101", "resnet101_noskip", "densenet201_imagenet",
-                                 'densenet121_imagenet'])
+                                 'densenet121_imagenet'])  # 模型类别，网络结构
 
     parser.add_argument('--tensorboard', type=str2bool, nargs='?',
                         help='Log progress to TensorBoard')
